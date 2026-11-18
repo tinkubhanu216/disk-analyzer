@@ -17,7 +17,30 @@ Built with C# / .NET 10 / WPF (Fluent theme), MVVM, SQLite and Serilog.
 
 Nothing on your drives is modified by scanning, searching, comparing or exporting.
 
-**[Download the latest release](../../releases/latest)**: the MSI installer, or a portable zip that runs without installing.
+## Download
+
+[![Download installer (.msi)](https://img.shields.io/badge/Download-Installer%20(.msi)-0067C0?style=for-the-badge&logo=windows)](https://github.com/tinkubhanu216/disk-analyzer/releases/latest/download/DiskAnalyzer-Setup-x64.msi)
+[![Download portable (.zip)](https://img.shields.io/badge/Download-Portable%20(.zip)-555555?style=for-the-badge&logo=windows)](https://github.com/tinkubhanu216/disk-analyzer/releases/latest/download/DiskAnalyzer-portable-x64.zip)
+
+The buttons always download the latest version. Older versions and release notes are on the [Releases page](https://github.com/tinkubhanu216/disk-analyzer/releases).
+
+**Requirements:** Windows 10 (1809 or later) or Windows 11, 64-bit. Nothing else is needed: the .NET runtime is included.
+
+**Installer (.msi):** run `DiskAnalyzer-Setup-x64.msi` and follow the wizard. It adds a Start menu shortcut, and newer versions upgrade in place. To remove it, use **Settings → Apps**.
+
+**Portable (.zip):** extract anywhere (for example a USB stick) and run `DiskAnalyzer.exe`. Nothing is installed.
+
+> **"Windows protected your PC"?** The downloads are not yet code-signed, so Windows SmartScreen warns about an unknown publisher. Click **More info → Run anyway**. Every release is built from this repository's source by [GitHub Actions](../../actions); you can check the download with the checksums below.
+
+**Verify your download (optional):** each release includes `SHA256SUMS.txt`. In PowerShell:
+
+```powershell
+Get-FileHash .\DiskAnalyzer-Setup-x64.msi -Algorithm SHA256
+```
+
+The hash should match the line for that file in [SHA256SUMS.txt](https://github.com/tinkubhanu216/disk-analyzer/releases/latest/download/SHA256SUMS.txt).
+
+Administrator rights are not needed. To use the much faster NTFS Master File Table scan for whole drives, right-click the app and choose **Run as administrator**, or use the **Run as admin** button inside the app.
 
 ## Screenshots
 
