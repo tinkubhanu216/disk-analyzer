@@ -35,18 +35,88 @@ jobs:
 
   release:
     # Tag a commit with v* (e.g. v1.0.1) to build the self-contained exe and MSI and attach them to a draft release.
+    # Code signing (SignPath) runs only when the SIGNPATH_API_TOKEN secret and SIGNPATH_ORGANIZATION_ID variable
+    # are configured; otherwise the release is built unsigned. See docs/CODE_SIGNING.md.
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: windows-latest
     permissions:
       contents: write
+      actions: read
+    env:
+      SIGNING_ENABLED: ${{ secrets.SIGNPATH_API_TOKEN != '' && vars.SIGNPATH_ORGANIZATION_ID != '' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
-      - name: Build, test, publish and package
+
+      - name: Build, test and publish
         shell: pwsh
-        run: ./build.ps1
+        run: ./build.ps1 -SkipInstaller
+
+      # 1) Sign the application's own binaries before they are packaged.
+      - name: Upload unsigned binaries
+        id: unsigned-binaries
+        if: env.SIGNING_ENABLED == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: unsigned-binaries
+          path: artifacts/publish/win-x64/
+          if-no-files-found: error
+      - name: Sign binaries (SignPath)
+        if: env.SIGNING_ENABLED == 'true'
+        uses: signpath/github-action-submit-signing-request@v2
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG || 'disk-analyzer' }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG || 'release-signing' }}
+          artifact-configuration-slug: app-binaries
+          github-artifact-id: ${{ steps.unsigned-binaries.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: artifacts/signed-binaries
+      - name: Use signed binaries
+        if: env.SIGNING_ENABLED == 'true'
+        shell: pwsh
+        run: |
+          Copy-Item artifacts/signed-binaries/* artifacts/publish/win-x64/ -Recurse -Force
+          Get-AuthenticodeSignature artifacts/publish/win-x64/DiskAnalyzer.exe | Format-List Status, SignerCertificate
+
+      # 2) Build the installer from the (signed) binaries, then sign the MSI itself.
+      - name: Build installer
+        shell: pwsh
+        run: |
+          dotnet build installer/DiskAnalyzer.Installer/DiskAnalyzer.Installer.wixproj -c Release "-p:PublishDir=$PWD/artifacts/publish/win-x64" -nologo
+          Copy-Item installer/DiskAnalyzer.Installer/bin/x64/Release/DiskAnalyzer-Setup-x64.msi artifacts/ -Force
+      - name: Upload unsigned installer
+        id: unsigned-installer
+        if: env.SIGNING_ENABLED == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: unsigned-installer
+          path: artifacts/DiskAnalyzer-Setup-x64.msi
+          if-no-files-found: error
+      - name: Sign installer (SignPath)
+        if: env.SIGNING_ENABLED == 'true'
+        uses: signpath/github-action-submit-signing-request@v2
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG || 'disk-analyzer' }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG || 'release-signing' }}
+          artifact-configuration-slug: installer
+          github-artifact-id: ${{ steps.unsigned-installer.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: artifacts/signed-installer
+      - name: Use signed installer
+        if: env.SIGNING_ENABLED == 'true'
+        shell: pwsh
+        run: |
+          Copy-Item artifacts/signed-installer/DiskAnalyzer-Setup-x64.msi artifacts/ -Force
+          Get-AuthenticodeSignature artifacts/DiskAnalyzer-Setup-x64.msi | Format-List Status, SignerCertificate
+
       - name: Zip portable build
         shell: pwsh
         run: Compress-Archive -Path artifacts/publish/win-x64/* -DestinationPath artifacts/DiskAnalyzer-portable-x64.zip

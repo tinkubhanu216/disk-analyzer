@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SignPath artifact configuration "app-binaries".
+  Input: the GitHub artifact containing the self-contained publish folder (artifacts/publish/win-x64).
+  Signs only this project's own binaries. Microsoft runtime files are already signed by Microsoft
+  and are left untouched.
+  Paste this into SignPath: Project > Artifact configurations > New (slug: app-binaries).
+-->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <zip-file>
+    <pe-file path="DiskAnalyzer.exe">
+      <authenticode-sign />
+    </pe-file>
+    <pe-file-set>
+      <include path="DiskAnalyzer.dll" />
+      <include path="DiskAnalyzer.*.dll" min-matches="4" max-matches="unbounded" />
+      <for-each>
+        <authenticode-sign />
+      </for-each>
+    </pe-file-set>
+  </zip-file>
+</artifact-configuration>

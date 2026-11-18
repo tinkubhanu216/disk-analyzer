@@ -131,6 +131,20 @@ The design rationale, including the data model, scanning pipeline, MFT handling,
 
 Settings, logs (14 days, rolling) and scan history live in `%LOCALAPPDATA%\DiskAnalyzer`. Nothing is sent over the network.
 
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+(Signing is being set up; releases before it is active are unsigned. See [docs/CODE_SIGNING.md](docs/CODE_SIGNING.md).)
+
+- **Committers and reviewers:** [Bhanuprasad Thandra](https://github.com/tinkubhanu216)
+- **Approvers:** [Bhanuprasad Thandra](https://github.com/tinkubhanu216)
+
+Only release binaries built by GitHub Actions from this repository's source are signed.
+
+**Privacy policy:** This program will not transfer any information to other networked systems unless specifically
+requested by the user or the person installing or operating it. All settings, logs and scan history stay on the
+local computer in `%LOCALAPPDATA%\DiskAnalyzer`.
+
 ## License
 
 [MIT](LICENSE) © 2026 Bhanuprasad Thandra. Third-party components are listed in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).

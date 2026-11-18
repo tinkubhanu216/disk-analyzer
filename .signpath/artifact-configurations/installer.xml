@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SignPath artifact configuration "installer".
+  Input: the GitHub artifact containing DiskAnalyzer-Setup-x64.msi (built from already signed binaries).
+  Paste this into SignPath: Project > Artifact configurations > New (slug: installer).
+-->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <zip-file>
+    <msi-file path="DiskAnalyzer-Setup-x64.msi">
+      <authenticode-sign />
+    </msi-file>
+  </zip-file>
+</artifact-configuration>
