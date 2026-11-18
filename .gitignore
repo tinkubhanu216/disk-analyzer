@@ -1,0 +1,8 @@
+bin/
+obj/
+artifacts/
+.bench-data/
+.vs/
+*.user
+TestResults/
+*.msi

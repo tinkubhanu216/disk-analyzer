@@ -1,0 +1,159 @@
+<UserControl x:Class="DiskAnalyzer.App.Views.HeatmapView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DiskAnalyzer.App.ViewModels"
+             xmlns:views="clr-namespace:DiskAnalyzer.App.Views"
+             xmlns:tm="clr-namespace:DiskAnalyzer.Visualization.Interaction;assembly=DiskAnalyzer.Visualization">
+    <Grid>
+        <TextBlock Text="Scan a drive or folder to visualize it." Style="{StaticResource PageSubtitle}" FontSize="15" Margin="0,8,0,0"
+                   Visibility="{Binding HasResult, Converter={StaticResource BoolToVis}, ConverterParameter=invert}" />
+        <DockPanel Visibility="{Binding HasResult, Converter={StaticResource BoolToVis}}">
+            <!-- Title + breadcrumb + zoom -->
+            <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Storage Heatmap" Style="{StaticResource PageTitle}" VerticalAlignment="Center" Margin="0,0,16,0" />
+                <ItemsControl Grid.Column="1" ItemsSource="{Binding Breadcrumbs}" VerticalAlignment="Center">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:BreadcrumbItem}">
+                            <StackPanel Orientation="Horizontal">
+                                <Button Style="{StaticResource BreadcrumbButton}" Content="{Binding Name}"
+                                        Command="{Binding DataContext.NavigateBreadcrumbCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" CommandParameter="{Binding}" />
+                                <TextBlock Style="{StaticResource Icon}" Text="&#xE76C;" FontSize="10" Margin="2,0" Foreground="{DynamicResource App.TextTertiary}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource SubtleButton}" Command="{Binding ZoomOutCommand}" IsEnabled="{Binding CanZoomOut}" ToolTip="Zoom out to parent folder (mouse wheel down, Backspace)">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource Icon}" Text="&#xE71F;" FontSize="14" Margin="0,0,6,0" />
+                            <TextBlock Text="Zoom out" Foreground="{DynamicResource App.TextPrimary}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource SubtleButton}" Command="{Binding ZoomInCommand}" ToolTip="Zoom into the selected folder (or click a folder, mouse wheel up)" Margin="4,0,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource Icon}" Text="&#xE8A3;" FontSize="14" Margin="0,0,6,0" />
+                            <TextBlock Text="Zoom in" Foreground="{DynamicResource App.TextPrimary}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource SubtleButton}" Command="{Binding ResetZoomCommand}" ToolTip="Back to the scanned root" Margin="4,0,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource Icon}" Text="&#xE80F;" FontSize="14" Margin="0,0,6,0" />
+                            <TextBlock Text="Reset" Foreground="{DynamicResource App.TextPrimary}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Options -->
+            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+                <TextBlock Text="Color by" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,6,4" />
+                <ComboBox ItemsSource="{Binding ColorModes}" SelectedItem="{Binding SelectedColorMode}" DisplayMemberPath="Label" Width="170" Margin="0,0,14,4" />
+                <ComboBox ItemsSource="{Binding Thresholds}" SelectedItem="{Binding SelectedThreshold}" DisplayMemberPath="Label" Width="160" Margin="0,0,14,4"
+                          ToolTip="Minimum size: smaller items are merged into a 'smaller items' tile" />
+                <CheckBox Content="Labels" IsChecked="{Binding ShowLabels}" VerticalAlignment="Center" Margin="0,0,12,4" />
+                <CheckBox Content="Highlight largest files" IsChecked="{Binding HighlightLargestFiles}" VerticalAlignment="Center" Margin="0,0,12,4"
+                          ToolTip="Outline the 10 largest files in view (amber)" />
+                <CheckBox Content="Highlight largest folders" IsChecked="{Binding HighlightLargestFolders}" VerticalAlignment="Center" Margin="0,0,14,4"
+                          ToolTip="Outline the 10 largest folders in view (cyan)" />
+                <Grid Width="220" Margin="0,0,8,4">
+                    <TextBox x:Name="FindBox" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, Delay=200}" Padding="28,5,8,5" VerticalContentAlignment="Center" />
+                    <TextBlock Style="{StaticResource Icon}" Text="&#xE721;" FontSize="12" Margin="10,0,0,0" HorizontalAlignment="Left" IsHitTestVisible="False" Foreground="{DynamicResource App.TextTertiary}" />
+                    <TextBlock Text="Find in map…" Margin="30,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False" Foreground="{DynamicResource App.TextTertiary}"
+                               Visibility="{Binding Text, ElementName=FindBox, Converter={StaticResource NullToVis}, ConverterParameter=invert}" />
+                </Grid>
+                <TextBlock Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="0,0,0,4"
+                           Visibility="{Binding SearchText, Converter={StaticResource NullToVis}}">
+                    <Run Text="{Binding SearchMatchCount, ElementName=Treemap, Mode=OneWay}" /><Run Text=" visible matches" />
+                </TextBlock>
+            </WrapPanel>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="290" />
+                </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource Card}" Padding="0" Background="{DynamicResource App.TreemapBackground}">
+                    <Border.ContextMenu>
+                        <ContextMenu x:Name="TileMenu">
+                            <MenuItem Header="Open containing folder" Command="{Binding OpenContainingFolderCommand}" />
+                            <MenuItem Header="Show in Folder Explorer" Command="{Binding ShowInFolderExplorerCommand}" />
+                            <MenuItem Header="Zoom into folder" Command="{Binding ZoomInCommand}" />
+                            <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}" />
+                        </ContextMenu>
+                    </Border.ContextMenu>
+                    <tm:TreemapControl x:Name="Treemap" Margin="1"
+                                       Tree="{Binding Tree}" RootNode="{Binding RootNode}" DriveCapacityBytes="{Binding DriveCapacity}"
+                                       ColorMode="{Binding SelectedColorMode.Value}" MinSizeBytes="{Binding SelectedThreshold.Bytes}"
+                                       ShowLabels="{Binding ShowLabels}" IsDark="{Binding IsDark}"
+                                       HighlightLargestFiles="{Binding HighlightLargestFiles}" HighlightLargestFolders="{Binding HighlightLargestFolders}"
+                                       SearchText="{Binding SearchText}" SelectedNode="{Binding SelectedNode, Mode=TwoWay}"
+                                       NodeClick="Treemap_NodeClick" ZoomRequested="Treemap_ZoomRequested" Rendered="Treemap_Rendered" NodeRightClick="Treemap_NodeRightClick"
+                                       AutomationProperties.Name="Storage treemap" />
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource Card}">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock Text="Current view" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="0,0,0,14">
+                                <Run Text="{Binding RootItem.FullPath, Mode=OneWay}" />
+                                <LineBreak />
+                                <Run Text="{Binding RootItem.SizeText, Mode=OneWay}" Foreground="{DynamicResource App.TextPrimary}" FontWeight="SemiBold" />
+                                <Run Text="·" />
+                                <Run Text="{Binding RootItem.FileCountText, Mode=OneWay}" /><Run Text=" files" />
+                            </TextBlock>
+
+                            <TextBlock Text="Selection" Style="{StaticResource SectionTitle}" />
+                            <TextBlock Text="Click a file to see its details. Click a folder to zoom into it; scroll to zoom in and out."
+                                       Style="{StaticResource Caption}" TextWrapping="Wrap" TextTrimming="None"
+                                       Visibility="{Binding SelectedItem, Converter={StaticResource NullToVis}, ConverterParameter=invert}" />
+                            <StackPanel Visibility="{Binding SelectedItem, Converter={StaticResource NullToVis}}">
+                                <views:NodeDetailsPanel DataContext="{Binding SelectedItem}" />
+                                <Button Style="{StaticResource AccentButton}" HorizontalAlignment="Stretch" Margin="0,12,0,6" Command="{Binding OpenContainingFolderCommand}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource Icon}" Text="&#xE838;" FontSize="14" Margin="0,0,8,0" Foreground="{DynamicResource App.OnAccent}" />
+                                        <TextBlock Text="Open containing folder" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Style="{StaticResource OutlineButton}" HorizontalAlignment="Stretch" Margin="0,0,0,6" Command="{Binding ShowInFolderExplorerCommand}">
+                                    <TextBlock Text="Show in Folder Explorer" />
+                                </Button>
+                                <Button Style="{StaticResource OutlineButton}" HorizontalAlignment="Stretch" Command="{Binding CopyPathCommand}">
+                                    <TextBlock Text="Copy path" />
+                                </Button>
+                            </StackPanel>
+
+                            <TextBlock Text="Legend" Style="{StaticResource SectionTitle}" Margin="0,18,0,8" />
+                            <ItemsControl ItemsSource="{Binding Legend}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:LegendItem}">
+                                        <StackPanel Orientation="Horizontal" Margin="0,2">
+                                            <Rectangle Width="12" Height="12" RadiusX="2" RadiusY="2" Fill="{Binding Brush}" Margin="0,0,8,0" />
+                                            <TextBlock Text="{Binding Label}" Style="{StaticResource Caption}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Rectangle Width="12" Height="12" Stroke="#FFFFB900" StrokeThickness="2" Margin="0,0,8,0" />
+                                <TextBlock Text="Largest files" Style="{StaticResource Caption}" Margin="0,0,14,0" />
+                                <Rectangle Width="12" Height="12" Stroke="#FF00E5FF" StrokeThickness="2" Margin="0,0,8,0" />
+                                <TextBlock Text="Largest folders" Style="{StaticResource Caption}" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding RenderStats}" Style="{StaticResource Caption}" FontSize="11" TextWrapping="Wrap" Margin="0,16,0,0" Foreground="{DynamicResource App.TextTertiary}" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </DockPanel>
+    </Grid>
+</UserControl>

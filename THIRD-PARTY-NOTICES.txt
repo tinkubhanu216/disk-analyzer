@@ -1,0 +1,28 @@
+Disk Analyzer — Third-Party Notices
+===================================
+
+Disk Analyzer is licensed under the MIT License (see LICENSE). It redistributes the
+following third-party components, each under its own license:
+
+Component                                  License        Source
+-----------------------------------------  -------------  ------------------------------------------------
+.NET Runtime and Windows Desktop (WPF)     MIT            https://github.com/dotnet/runtime
+                                                          https://github.com/dotnet/wpf
+Microsoft.Extensions.DependencyInjection   MIT            https://github.com/dotnet/runtime
+Microsoft.Extensions.Logging               MIT            https://github.com/dotnet/runtime
+Microsoft.Data.Sqlite                      MIT            https://github.com/dotnet/efcore
+SQLitePCLRaw                               Apache-2.0     https://github.com/ericsink/SQLitePCL.raw
+SQLite                                     Public domain  https://www.sqlite.org/copyright.html
+Serilog                                    Apache-2.0     https://github.com/serilog/serilog
+Serilog.Sinks.File                         Apache-2.0     https://github.com/serilog/serilog-sinks-file
+Serilog.Extensions.Logging                 Apache-2.0     https://github.com/serilog/serilog-extensions-logging
+CommunityToolkit.Mvvm                      MIT            https://github.com/CommunityToolkit/dotnet
+
+Build and test tools (not redistributed with the application):
+
+WiX Toolset                                MS-RL          https://github.com/wixtoolset/wix
+xUnit                                      Apache-2.0     https://github.com/xunit/xunit
+coverlet                                   MIT            https://github.com/coverlet-coverage/coverlet
+
+The full text of each license is available at the source links above. Apache-2.0 components
+are used unmodified.

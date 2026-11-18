@@ -1,0 +1,75 @@
+<UserControl x:Class="DiskAnalyzer.App.Views.SearchView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DiskAnalyzer.App.ViewModels"
+             xmlns:c="clr-namespace:DiskAnalyzer.App.Controls">
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+            <TextBlock Text="Search" Style="{StaticResource PageTitle}" />
+            <TextBlock Text="Searches the scan index in memory — results are instant and nothing is rescanned. Use * and ? as wildcards." Style="{StaticResource PageSubtitle}" />
+        </StackPanel>
+        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+            <TextBox Text="{Binding QueryText, UpdateSourceTrigger=PropertyChanged}" Width="280" Margin="0,0,8,4" c:Hint.Text="Name contains… or *.iso" ToolTip="Name contains… (or wildcard such as *.iso)" />
+            <ComboBox ItemsSource="{Binding KindOptions}" SelectedItem="{Binding SelectedKind}" DisplayMemberPath="Label" Width="160" Margin="0,0,8,4" />
+            <ComboBox ItemsSource="{Binding CategoryOptions}" SelectedItem="{Binding SelectedCategory}" DisplayMemberPath="Label" Width="140" Margin="0,0,8,4" />
+            <TextBlock Text="Extensions" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="4,0,6,4" />
+            <TextBox Text="{Binding ExtensionText, UpdateSourceTrigger=PropertyChanged}" Width="120" Margin="0,0,8,4" c:Hint.Text="mp4, mkv" ToolTip="e.g. mp4, mkv" />
+            <TextBlock Text="Min size" Style="{StaticResource Caption}" VerticalAlignment="Center" Margin="4,0,6,4" />
+            <TextBox Text="{Binding MinSizeText, UpdateSourceTrigger=PropertyChanged}" Width="100" Margin="0,0,8,4" c:Hint.Text="500 MB" ToolTip="e.g. 500 MB" />
+            <Button Style="{StaticResource LinkButton}" Command="{Binding ClearFiltersCommand}" VerticalAlignment="Center" Margin="4,0,0,4">
+                <TextBlock Text="Clear filters" />
+            </Button>
+        </WrapPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+            <ProgressBar IsIndeterminate="True" Width="60" Height="3" Margin="0,0,8,0" Visibility="{Binding IsSearching, Converter={StaticResource BoolToVis}}" />
+            <TextBlock Text="{Binding Summary}" Style="{StaticResource Caption}" />
+        </StackPanel>
+        <Border Style="{StaticResource Card}" Padding="0">
+            <ListView x:Name="ResultsList" ItemsSource="{Binding Results}" SelectedItem="{Binding SelectedResult}" MouseDoubleClick="Results_MouseDoubleClick"
+                      Background="Transparent" BorderThickness="0"
+                      VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.ScrollUnit="Pixel">
+                <ListView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Show in Folder Explorer" Command="{Binding ShowLocationCommand}" CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <MenuItem Header="Show in heatmap" Command="{Binding ShowInHeatmapCommand}" CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <MenuItem Header="Open in Windows Explorer" Command="{Binding ShowInWindowsExplorerCommand}" CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                        <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}" CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                    </ContextMenu>
+                </ListView.ContextMenu>
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Name" Width="460" CellTemplate="{StaticResource NodePathCell}" />
+                        <GridViewColumn Header="Size" Width="100">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:NodeItemViewModel}">
+                                    <TextBlock Text="{Binding SizeText}" Style="{StaticResource Body}" FontWeight="SemiBold" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="% of drive" Width="80">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:NodeItemViewModel}">
+                                    <TextBlock Text="{Binding PercentOfDriveText}" Style="{StaticResource Caption}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Type" Width="110">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:NodeItemViewModel}">
+                                    <TextBlock Text="{Binding TypeText}" Style="{StaticResource Caption}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Modified" Width="130">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate DataType="{x:Type vm:NodeItemViewModel}">
+                                    <TextBlock Text="{Binding ModifiedText}" Style="{StaticResource Caption}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Border>
+    </DockPanel>
+</UserControl>

@@ -1,0 +1,128 @@
+<UserControl x:Class="DiskAnalyzer.App.Views.FileTypesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:DiskAnalyzer.App.ViewModels"
+             xmlns:c="clr-namespace:DiskAnalyzer.App.Controls">
+    <Grid>
+        <TextBlock Text="Scan a drive or folder to see its file types." Style="{StaticResource PageSubtitle}" FontSize="15" Margin="0,8,0,0"
+                   Visibility="{Binding HasResult, Converter={StaticResource BoolToVis}, ConverterParameter=invert}" />
+        <Grid Visibility="{Binding HasResult, Converter={StaticResource BoolToVis}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <StackPanel Margin="0,0,0,10">
+                <TextBlock Text="File Types" Style="{StaticResource PageTitle}" />
+                <TextBlock Text="{Binding TotalText}" Style="{StaticResource PageSubtitle}" />
+            </StackPanel>
+
+            <Grid Grid.Row="1" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <!-- Category distribution -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="File type distribution" Style="{StaticResource SectionTitle}" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <c:DonutChart Width="180" Height="180" RingThickness="28" Segments="{Binding CategorySegments}" CenterTitle="By size"
+                                          Foreground="{DynamicResource App.TextPrimary}" />
+                            <ItemsControl Grid.Column="1" ItemsSource="{Binding Categories}" VerticalAlignment="Center">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:CategoryRow}">
+                                        <Button Style="{StaticResource SubtleButton}" HorizontalContentAlignment="Stretch" Padding="6,4"
+                                                Command="{Binding DataContext.SearchCategoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}"
+                                                ToolTip="List these files in Search">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="110" />
+                                                    <ColumnDefinition Width="80" />
+                                                    <ColumnDefinition Width="56" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Rectangle Width="10" Height="10" RadiusX="2" RadiusY="2" Fill="{Binding Brush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Text="{Binding Name}" Style="{StaticResource Body}" />
+                                                <TextBlock Grid.Column="2" Text="{Binding SizeText}" Style="{StaticResource Body}" />
+                                                <TextBlock Grid.Column="3" Text="{Binding PercentText}" Style="{StaticResource Caption}" />
+                                                <TextBlock Grid.Column="4" Text="{Binding FilesText}" Style="{StaticResource Caption}" />
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Top 10 extensions -->
+                <Border Grid.Column="2" Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="Top 10 extensions by space" Style="{StaticResource SectionTitle}" />
+                        <ItemsControl ItemsSource="{Binding TopExtensions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:ExtensionRow}">
+                                    <Grid Margin="0,3">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="90" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="90" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Name}" Style="{StaticResource Body}" />
+                                        <c:UsageBar Grid.Column="1" Height="14" Radius="3" Value="{Binding Ratio}" BarBrush="{Binding Brush}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Text="{Binding SizeText}" Style="{StaticResource Caption}" HorizontalAlignment="Right" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- All extensions -->
+            <Border Grid.Row="2" Style="{StaticResource Card}" Padding="0">
+                <DockPanel>
+                    <Grid DockPanel.Dock="Top" Margin="16,12,16,8">
+                        <TextBlock Text="All extensions" Style="{StaticResource SectionTitle}" Margin="0" VerticalAlignment="Center" />
+                        <TextBox Text="{Binding ExtensionFilter, UpdateSourceTrigger=PropertyChanged}" Width="220" HorizontalAlignment="Right" c:Hint.Text="Filter extensions…" ToolTip="Filter by extension or category" />
+                    </Grid>
+                    <ListView ItemsSource="{Binding Extensions}" SelectedItem="{Binding SelectedExtension}" MouseDoubleClick="Extensions_MouseDoubleClick"
+                              Background="Transparent" BorderThickness="0"
+                              VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.ScrollUnit="Pixel">
+                        <ListView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="List these files" Command="{Binding SearchExtensionCommand}" CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+                            </ContextMenu>
+                        </ListView.ContextMenu>
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Extension" Width="140">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate DataType="{x:Type vm:ExtensionRow}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Rectangle Width="10" Height="10" RadiusX="2" RadiusY="2" Fill="{Binding Brush}" Margin="0,0,8,0" />
+                                                <TextBlock Text="{Binding Name}" Style="{StaticResource Body}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Category" Width="120" DisplayMemberBinding="{Binding Category}" />
+                                <GridViewColumn Header="Total size" Width="110" DisplayMemberBinding="{Binding SizeText}" />
+                                <GridViewColumn Header="Share" Width="80" DisplayMemberBinding="{Binding ShareText}" />
+                                <GridViewColumn Header="Files" Width="100" DisplayMemberBinding="{Binding FilesText}" />
+                                <GridViewColumn Header="Average size" Width="110" DisplayMemberBinding="{Binding AverageText}" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
