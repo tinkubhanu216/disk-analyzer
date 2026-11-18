@@ -17,6 +17,37 @@ Built with C# / .NET 10 / WPF (Fluent theme), MVVM, SQLite and Serilog.
 
 Nothing on your drives is modified by scanning, searching, comparing or exporting.
 
+**[Download the latest release](../../releases/latest)**: the MSI installer, or a portable zip that runs without installing.
+
+## Screenshots
+
+**Overview**: headline numbers, storage by folder, a live treemap, the largest files and the file-type breakdown.
+
+![Overview](docs/images/overview.png)
+
+**Storage Heatmap**: a nested, cushion-shaded treemap. Click a folder to zoom in, scroll to zoom out, and hover for details.
+
+![Storage Heatmap](docs/images/heatmap.png)
+
+<details>
+<summary><b>More screenshots</b>: Folder Explorer, Largest Files, File Types</summary>
+
+**Folder Explorer**: lazy folder tree, breadcrumbs, sorting and filters, with a details panel.
+
+![Folder Explorer](docs/images/explorer.png)
+
+**Largest Files & Folders**: ranked lists with export and a duplicate finder.
+
+![Largest Files](docs/images/largest-files.png)
+
+**File Types**: category distribution and the extensions using the most space.
+
+![File Types](docs/images/file-types.png)
+
+</details>
+
+<sub>Screenshots show generated demo data (`tools/make-demo-data.ps1`); regenerate them with `tools/take-screenshots.ps1`.</sub>
+
 ## Requirements
 
 - Windows 10 1809+ or Windows 11, x64 (an arm64 build is possible via `build.ps1 -Runtime win-arm64`)

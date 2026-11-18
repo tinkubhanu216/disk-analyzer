@@ -6,3 +6,4 @@ artifacts/
 *.user
 TestResults/
 *.msi
+.demo-data/
