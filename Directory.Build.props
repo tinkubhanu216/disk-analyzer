@@ -8,6 +8,9 @@
     <Authors>Bhanuprasad Thandra</Authors>
     <Product>Disk Analyzer</Product>
     <Version>1.0.1</Version>
+    <!-- Keep ProductVersion identical on every binary (e.g. "1.0.1", no "+commit" suffix):
+         SignPath enforces product name/version on signed files. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <Copyright>Copyright (c) 2026 Bhanuprasad Thandra. MIT License.</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Deterministic>true</Deterministic>

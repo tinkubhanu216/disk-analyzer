@@ -2,11 +2,16 @@
 <!--
   SignPath artifact configuration "installer".
   Input: the GitHub artifact containing DiskAnalyzer-Setup-x64.msi (built from already signed binaries).
+  File metadata restrictions enforce the product name and the release version.
+  The "version" parameter is supplied by the release workflow (tag without the leading "v").
   Paste this into SignPath: Project > Artifact configurations > New (slug: installer).
 -->
 <artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <parameters>
+    <parameter name="version" required="true" />
+  </parameters>
   <zip-file>
-    <msi-file path="DiskAnalyzer-Setup-x64.msi">
+    <msi-file path="DiskAnalyzer-Setup-x64.msi" product-name="Disk Analyzer" product-version="${version}">
       <authenticode-sign />
     </msi-file>
   </zip-file>

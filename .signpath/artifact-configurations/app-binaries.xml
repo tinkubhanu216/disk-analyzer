@@ -3,17 +3,22 @@
   SignPath artifact configuration "app-binaries".
   Input: the GitHub artifact containing the self-contained publish folder (artifacts/publish/win-x64).
   Signs only this project's own binaries. Microsoft runtime files are already signed by Microsoft
-  and are left untouched.
+  and are left untouched (SignPath Foundation: "sign your own binaries only").
+  File metadata restrictions enforce the product name and the release version on every signed file.
+  The "version" parameter is supplied by the release workflow (tag without the leading "v").
   Paste this into SignPath: Project > Artifact configurations > New (slug: app-binaries).
 -->
 <artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <parameters>
+    <parameter name="version" required="true" />
+  </parameters>
   <zip-file>
-    <pe-file path="DiskAnalyzer.exe">
+    <pe-file path="DiskAnalyzer.exe" product-name="Disk Analyzer" product-version="${version}">
       <authenticode-sign />
     </pe-file>
     <pe-file-set>
-      <include path="DiskAnalyzer.dll" />
-      <include path="DiskAnalyzer.*.dll" min-matches="4" max-matches="unbounded" />
+      <include path="DiskAnalyzer.dll" product-name="Disk Analyzer" product-version="${version}" />
+      <include path="DiskAnalyzer.*.dll" min-matches="4" max-matches="unbounded" product-name="Disk Analyzer" product-version="${version}" />
       <for-each>
         <authenticode-sign />
       </for-each>

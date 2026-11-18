@@ -50,6 +50,15 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Determine version
+        id: version
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          $project = ([xml](Get-Content Directory.Build.props)).Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+          if ($version -ne $project) { throw "Tag version $version does not match <Version>$project</Version> in Directory.Build.props" }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
       - name: Build, test and publish
         shell: pwsh
         run: ./build.ps1 -SkipInstaller
@@ -73,6 +82,8 @@ jobs:
           signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG || 'release-signing' }}
           artifact-configuration-slug: app-binaries
           github-artifact-id: ${{ steps.unsigned-binaries.outputs.artifact-id }}
+          parameters: |
+            version: "${{ steps.version.outputs.version }}"
           wait-for-completion: true
           wait-for-completion-timeout-in-seconds: 3600
           output-artifact-directory: artifacts/signed-binaries
@@ -107,6 +118,8 @@ jobs:
           signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG || 'release-signing' }}
           artifact-configuration-slug: installer
           github-artifact-id: ${{ steps.unsigned-installer.outputs.artifact-id }}
+          parameters: |
+            version: "${{ steps.version.outputs.version }}"
           wait-for-completion: true
           wait-for-completion-timeout-in-seconds: 3600
           output-artifact-directory: artifacts/signed-installer
@@ -131,4 +144,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         shell: pwsh
-        run: gh release create "${{ github.ref_name }}" artifacts/*.msi artifacts/*.zip artifacts/SHA256SUMS.txt --draft --generate-notes --title "Disk Analyzer ${{ github.ref_name }}"
+        run: gh release create "${{ github.ref_name }}" artifacts/*.msi artifacts/*.zip artifacts/SHA256SUMS.txt --draft --notes-file .github/release-notes-header.md --generate-notes --title "Disk Analyzer ${{ github.ref_name }}"
