@@ -37,6 +37,27 @@ public partial class ExplorerView : UserControl
         }
     }
 
+    /// <summary>
+    /// Gives the Name column whatever width the other columns leave, so every column fits without a horizontal
+    /// scroll bar at common window sizes (e.g. 1280 px wide at 150% scaling). Name never shrinks below 110.
+    /// </summary>
+    private void ItemsList_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (ItemsList.View is not GridView view || view.Columns.Count == 0)
+        {
+            return;
+        }
+
+        double others = 0;
+        for (int i = 1; i < view.Columns.Count; i++)
+        {
+            others += view.Columns[i].ActualWidth > 0 ? view.Columns[i].ActualWidth : view.Columns[i].Width;
+        }
+
+        double available = ItemsList.ActualWidth - others - SystemParameters.VerticalScrollBarWidth - 12;
+        view.Columns[0].Width = Math.Max(110, available);
+    }
+
     private void ItemsList_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter && ItemsList.SelectedItem is NodeItemViewModel item)

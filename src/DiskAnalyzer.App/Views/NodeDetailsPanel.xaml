@@ -37,9 +37,7 @@
             <TextBlock Grid.Row="5" Text="Subfolders" Visibility="{Binding IsDirectory, Converter={StaticResource BoolToVis}}" />
             <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding FolderCountText}" Margin="12,2,0,2" Foreground="{DynamicResource App.TextPrimary}" Visibility="{Binding IsDirectory, Converter={StaticResource BoolToVis}}" />
             <TextBlock Grid.Row="6" Text="Type" />
-            <TextBlock Grid.Row="6" Grid.Column="1" Margin="12,2,0,2" Foreground="{DynamicResource App.TextPrimary}">
-                <Run Text="{Binding TypeText, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding CategoryText, Mode=OneWay}" />
-            </TextBlock>
+            <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding TypeDescription}" Margin="12,2,0,2" Foreground="{DynamicResource App.TextPrimary}" />
             <TextBlock Grid.Row="7" Text="Modified" />
             <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding ModifiedText}" Margin="12,2,0,2" Foreground="{DynamicResource App.TextPrimary}" />
             <TextBlock Grid.Row="8" Text="Note" Visibility="{Binding Note, Converter={StaticResource NullToVis}}" />

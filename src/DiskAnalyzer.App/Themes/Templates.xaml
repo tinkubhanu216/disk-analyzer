@@ -1,4 +1,4 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:DiskAnalyzer.App.ViewModels"
                     xmlns:c="clr-namespace:DiskAnalyzer.App.Controls">
@@ -92,10 +92,10 @@
 
     <!-- Size + bar cell -->
     <DataTemplate x:Key="NodeShareCell" DataType="{x:Type vm:NodeItemViewModel}">
-        <Grid Width="120">
+        <Grid Width="100">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="48" />
+                <ColumnDefinition Width="52" />
             </Grid.ColumnDefinitions>
             <c:UsageBar Height="6" Value="{Binding ParentRatio}" BarBrush="{Binding BarBrush}" TrackBrush="{DynamicResource App.Track}" VerticalAlignment="Center" />
             <TextBlock Grid.Column="1" Text="{Binding PercentOfParentText}" Style="{StaticResource Caption}" HorizontalAlignment="Right" />

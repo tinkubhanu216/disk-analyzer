@@ -75,6 +75,9 @@ public sealed class NodeItemViewModel
 
     public string ModifiedText => LastModifiedUtc?.ToLocalTime().ToString("g") ?? string.Empty;
 
+    /// <summary>Date only, for narrow list columns (the full date and time is in <see cref="ModifiedText"/>).</summary>
+    public string ModifiedDateText => LastModifiedUtc?.ToLocalTime().ToString("d") ?? string.Empty;
+
     public string SizeText => SizeFormatter.Format(SizeBytes);
 
     public string AllocatedText => SizeFormatter.Format(AllocatedBytes);
@@ -90,6 +93,9 @@ public sealed class NodeItemViewModel
     public string TypeText => IsDirectory ? "Folder" : string.IsNullOrEmpty(Extension) ? "File" : Extension.TrimStart('.').ToUpperInvariant() + " file";
 
     public string CategoryText => IsDirectory ? "Folder" : Category.ToString();
+
+    /// <summary>"Folder" for folders; "MP4 file · Videos" for files.</summary>
+    public string TypeDescription => IsDirectory ? "Folder" : $"{TypeText} · {CategoryText}";
 
     public string Glyph =>
         (Flags & NodeFlags.Inaccessible) != 0 ? ""
