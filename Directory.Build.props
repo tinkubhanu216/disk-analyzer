@@ -7,7 +7,7 @@
     <Company>Bhanuprasad Thandra</Company>
     <Authors>Bhanuprasad Thandra</Authors>
     <Product>Disk Analyzer</Product>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <!-- Keep ProductVersion identical on every binary (e.g. "1.0.1", no "+commit" suffix):
          SignPath enforces product name/version on signed files. -->
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
